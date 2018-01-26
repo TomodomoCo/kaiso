@@ -53,12 +53,12 @@ Kaiso is essentially a router that uses the [WordPress Template Hierarchy](https
 
 Instead of a full WordPress theme, we have a single `index.php` file (the final fallback in the hierarchy). That file loads up a small app, which:
 
-0. Creates a [Pimple](https://pimple.symfony.com) container
-0. Adds the current `global $wp_query;` to the container
-0. Uses [Brain-WP's Hierarchy package](https://github.com/Brain-WP/Hierarchy) to get a list of the templates in the hierarchy for the current `$wp_query`
-0. Parses those template names into fully namespaced controller class paths (using the path you provide in the theme's `index.php` file)
-0. Checks if each class exists and instantiates the one that does, with the Pimple instance passed in
-0. Runs (or tries to run) a method from the controller to handle the request, which is one of:
+1. Creates a [Pimple](https://pimple.symfony.com) container
+1. Adds the current `global $wp_query;` to the container
+1. Uses [Brain-WP's Hierarchy package](https://github.com/Brain-WP/Hierarchy) to get a list of the templates in the hierarchy for the current `$wp_query`
+1. Parses those template names into fully namespaced controller class paths (using the path you provide in the theme's `index.php` file)
+1. Checks if each class exists (in order of most-to-least specific) and instantiates the first one it finds, with the Pimple instance passed in
+1. Runs (or tries to run) a method from the controller to handle the request, which is one of:
     + `$controller->any()` If this is available in the controller class, it will always be run
     + `$controller->get()`, `->post()`, `->put()`, etc. If `->any()` isn't available, it will load a method corresponding to the value of `$_SERVER['REQUEST']`
 
