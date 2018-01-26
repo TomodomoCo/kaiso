@@ -4,7 +4,7 @@ Kaiso provides a barebones structure for building controller/view-powered WordPr
 
 It attempts to automatically route a WordPress request to a controller named to match the template you'd like to load. In effect, Kaiso turns the template hierarchy into a router.
 
-You might be interested in the [example project](https://github.com/TomodomoCo/kaiso), demonstrating how Kaiso works in context.
+You might be interested in the [example project](https://github.com/TomodomoCo/kaiso-example), demonstrating how Kaiso works in context.
 
 ## Setup
 
