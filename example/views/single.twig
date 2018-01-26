@@ -1,0 +1,9 @@
+<em>This is a single post template.</em>
+
+<hr>
+
+{% for post in posts %}
+	<h1>{{post.post_title}}</h1>
+
+	{{post.post_content}}
+{% endfor %}
