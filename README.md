@@ -4,6 +4,8 @@ Kaiso provides a barebones structure for building controller/view-powered WordPr
 
 It attempts to automatically route a WordPress request to a controller named to match the template you'd like to load. In effect, Kaiso turns the template hierarchy into a router.
 
+You might be interested in the [example project](https://github.com/TomodomoCo/kaiso), demonstrating how Kaiso works in context.
+
 ## Setup
 
 Kaiso is intended for use within an "app-style" WordPress instance. Our [TomodomoCo/starter-wp](https://github.com/TomodomoCo/starter-wp) framework is a good starting point. It's assumed you're using Composer.
@@ -41,6 +43,37 @@ Kaiso is sort of agnostic to plugins and themes. As far as I can tell, if you st
 
 **Should I use it in production?**<br>
 I wouldn't recommend it. At least not yet, and certainly not if looking at the code makes your head spin.
+
+**Does Kaiso let me add arbitrary routes?**<br>
+Not at this point, and possibly never. If that's a critical need for your project, our [starter-slimwp](https://github.com/TomodomoCo/starter-slimwp) approach might be a good option.
+
+## Technical Overview
+
+Kaiso is essentially a router that uses the [WordPress Template Hierarchy](https://developer.wordpress.org/themes/basics/template-hierarchy/) to determine which controller to load.
+
+Instead of a full WordPress theme, we have a single `index.php` file (the final fallback in the hierarchy). That file loads up a small app, which:
+
+0. Creates a [Pimple](https://pimple.symfony.com) container
+0. Adds the current `global $wp_query;` to the container
+0. Uses [Brain-WP's Hierarchy package](https://github.com/Brain-WP/Hierarchy) to get a list of the templates in the hierarchy for the current `$wp_query`
+0. Parses those template names into fully namespaced controller class paths (using the path you provide in the theme's `index.php` file)
+0. Checks if each class exists and instantiates the one that does, with the Pimple instance passed in
+0. Runs (or tries to run) a method from the controller to handle the request, which is one of:
+    + `$controller->any()` If this is available in the controller class, it will always be run
+    + `$controller->get()`, `->post()`, `->put()`, etc. If `->any()` isn't available, it will load a method corresponding to the value of `$_SERVER['REQUEST']`
+
+In the future, the method names may be customisable and/or mappable. Additionally, it would be cool to create a PSR7-ish Request object that can be passed into the controller methods.
+
+## What doesn't Kaiso do?
+
+Kaiso is designed to be intentionally lightweight, and can be built into most configurations. Here's what's not current possible, or isn't in Kaiso's mission:
+
++ Kaiso doesn't provide any models. There are several good options for generic WordPress models.
++ Kaiso doesn't let you assign arbitrary routes. (See the FAQ for more.)
++ Kaiso doesn't give you Request and Response objects; you have to `return` your string and set headers with `header()`.
++ Kaiso doesn't make any template engine decisions. Our examples reference Twig, but you're free to use Smarty, Blade, or any other template engine of your choice.
++ Kaiso isn't a framework. It can be part of a framework, but isn't a complete solution in and of itself.
++ Kaiso isn't tested. Not in phpunit, not in real world applications. Try it if you dare!
 
 ## About Tomodomo
 
