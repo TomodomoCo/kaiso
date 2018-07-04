@@ -6,10 +6,10 @@
  * wp-content/themes directory, or start your own version.
  *
  * (If you've ever worked with minimalist frameworks like
- * Slim, this should be familiar to you!
+ * Slim, this should be familiar to you!)
  */
 
-use \Tomodomo\Kaiso as App;
+use \TomodomoCo\Kaiso as App;
 
 // App settings. So far you only need to provide a controllerPath
 $settings = [

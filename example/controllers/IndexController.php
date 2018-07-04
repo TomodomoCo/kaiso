@@ -2,7 +2,7 @@
 
 namespace MyApp\Controllers;
 
-use \Tomodomo\Kaiso\Controllers\BaseController;
+use \TomodomoCo\Kaiso\Controllers\BaseController;
 
 /**
  * IndexController is for demo purposes.

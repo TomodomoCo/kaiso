@@ -62,7 +62,7 @@ Instead of a full WordPress theme, we have a single `index.php` file (the final 
     + `$controller->any()` If this is available in the controller class, it will always be run
     + `$controller->get()`, `->post()`, `->put()`, etc. If `->any()` isn't available, it will load a method corresponding to the value of `$_SERVER['REQUEST']`
 
-In the future, the method names may be customisable and/or mappable. Additionally, it would be cool to create a PSR7-ish Request object that can be passed into the controller methods.
+In the future, the method names may be customisable and/or mappable.
 
 ## What doesn't Kaiso do?
 
@@ -70,14 +70,15 @@ Kaiso is designed to be intentionally lightweight, and can be built into most co
 
 + Kaiso doesn't provide any models. There are several good options for generic WordPress models.
 + Kaiso doesn't let you assign arbitrary routes. (See the FAQ for more.)
-+ Kaiso doesn't give you Request and Response objects; you have to `return` your string and set headers with `header()`.
++ Kaiso doesn't give you ~Request and~ Response objects; you have to `return` your string and set headers with `header()`.
+    + **Update:** Controller method signatures have changed to `method(Request $request, $response, $args)`. `$request` is a PSR7 compatible Request object, `$response` is null (for purposes of forward compatibility; this will eventually be a real PSR7 Response object), and `$args` consists of parsed query parameters.
 + Kaiso doesn't make any template engine decisions. Our examples reference Twig, but you're free to use Smarty, Blade, or any other template engine of your choice.
 + Kaiso isn't a framework. It can be part of a framework, but isn't a complete solution in and of itself.
 + Kaiso isn't tested. Not in phpunit, not in real world applications. Try it if you dare!
 
 ## About Tomodomo
 
-Tomodomo is a creative agency for communities. We focus on unique design and technical solutions to grow community activity and increase customer retention for online networking forums and customer service communities.
+Tomodomo is a creative agency for magazine publishers. We use custom design and technology to speed up your editorial workflow, engage your readers, and build sustainable subscription revenue for your business.
 
 Learn more at [tomodomo.co](https://tomodomo.co) or email us: [hello@tomodomo.co](mailto:hello@tomodomo.co)
 

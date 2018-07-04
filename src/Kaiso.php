@@ -1,6 +1,8 @@
 <?php
 
-namespace Tomodomo;
+namespace TomodomoCo;
+
+use GuzzleHttp\Psr7;
 
 /*
  * Kaiso is the meat and potatoes of this whole operation.
@@ -92,18 +94,22 @@ class Kaiso {
 		// Fetch our formatted list of controller names
 		$controllers = $this->getControllerHierarchy();
 
+		// Empty controller to fill in later
+		$controller = null;
+
 		// Loop through the possible controllers
-		foreach ($controllers as $controller) {
+		foreach ($controllers as $controllerName) {
 			// Check if it exists; instantiate if so
-			if (class_exists($controller)) {
-				$controller = new $controller($this->container);
+			if (class_exists($controllerName)) {
+				$controller = new $controllerName($this->container);
 
 				break;
 			}
 		}
 
-		// Sanity check on the controller
-		if (!is_object($controller)) {
+		// If we didn't get a controller, throw an exception
+		if ($controller === null) {
+			// @todo Use a specific Exception
 			throw new \Exception();
 		}
 
@@ -117,18 +123,31 @@ class Kaiso {
 	 */
 	public function run()
 	{
+		// @todo handle an exception here
 		$controller = $this->getController();
+
+		// Grab the server request object
+		$request = Psr7\ServerRequest::fromGlobals();
+
+		// @todo Massage WordPress to use a PSR7-compatible response
+		$response = null;
+
+		// Pass along query args
+		$args = $request->getQueryParams();
+
+		// Get the request method
+		$method = strtolower($_SERVER['REQUEST_METHOD'])
 
 		// If the method `any` exists on our found controller, load that.
 		// Otherwise, we load a method matching the request method (e.g.
 		// get(), post(), etc.
-		//
-		// @TODO This is also where we can pass in a PSR-7 style request
-		// object, if we want.
 		if (method_exists($controller, 'any')) {
-			echo $controller->any();
+			echo $controller->any($request, $response, $args);
+		} else if (method_exists($controller, $method) {
+			echo $controller->{$method}($request, $response, $args);
 		} else {
-			echo $controller->{strtolower($_SERVER['REQUEST_METHOD'])}();
+			// @todo Use a specific Exception
+			throw new \Exception();
 		}
 
 		exit;

@@ -1,23 +1,23 @@
 {
   "name": "tomodomoco/kaiso",
-  "description": "Template hierarchy-powered controllers in WordPress",
+  "description": "Template hierarchy-powered pseudo-framework in WordPress",
   "type": "library",
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "authors": [
     {
       "name": "Chris Van Patten",
-      "email": "chris@vanpattenmedia.com"
+      "email": "chris@tomodomo.co"
     }
   ],
   "require": {
-    "johnpbloch/wordpress": "^4.9",
     "danielstjules/stringy": "^3.1",
     "pimple/pimple": "^3.2",
-    "brain/hierarchy": "^2.3"
+    "brain/hierarchy": "^2.3",
+    "guzzlehttp/psr7": "^1.4"
   },
   "autoload": {
     "psr-4": {
-      "Tomodomo\\": [
+      "TomodomoCo\\": [
         "src"
       ]
     }

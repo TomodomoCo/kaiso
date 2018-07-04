@@ -1,6 +1,6 @@
 <?php
 
-namespace Tomodomo\Kaiso\Controllers;
+namespace TomodomoCo\Kaiso\Controllers;
 
 class BaseController {
 	/**
