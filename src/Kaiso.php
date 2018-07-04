@@ -136,14 +136,14 @@ class Kaiso {
 		$args = $request->getQueryParams();
 
 		// Get the request method
-		$method = strtolower($_SERVER['REQUEST_METHOD'])
+		$method = strtolower($_SERVER['REQUEST_METHOD']);
 
 		// If the method `any` exists on our found controller, load that.
 		// Otherwise, we load a method matching the request method (e.g.
 		// get(), post(), etc.
 		if (method_exists($controller, 'any')) {
 			echo $controller->any($request, $response, $args);
-		} else if (method_exists($controller, $method) {
+		} else if (method_exists($controller, $method)) {
 			echo $controller->{$method}($request, $response, $args);
 		} else {
 			// @todo Use a specific Exception
