@@ -1,5 +1,5 @@
 {
-  "name": "tomodomoco/kaiso",
+  "name": "tomodomo/kaiso",
   "description": "Template hierarchy-powered pseudo-framework in WordPress",
   "type": "library",
   "license": "MIT",
@@ -17,9 +17,13 @@
   },
   "autoload": {
     "psr-4": {
-      "TomodomoCo\\": [
+      "Tomodomo\\": [
         "src"
       ]
     }
+  },
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.3",
+    "vimeo/psalm": "^2.0"
   }
 }
