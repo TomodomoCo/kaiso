@@ -3,6 +3,8 @@
   <description>Tomodomo's custom PSR-2 based Ruleset</description>
 
   <arg name="tab-width" value="4" />
+  <arg value="-colors" />
+  <arg value="p" />
 
   <rule ref="PSR2" />
 
