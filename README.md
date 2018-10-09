@@ -42,10 +42,34 @@ Probably not. I mean, maybe. Yes?
 Kaiso is sort of agnostic to plugins and themes. As far as I can tell, if you still output the right functions in the right places in your template layer, you should still have full compatibility with most plugins. I haven't tested it in detail with any plugins, but you're probably okay if you do everything else right.
 
 **Should I use it in production?**<br>
-I wouldn't recommend it. At least not yet, and certainly not if looking at the code makes your head spin.
+Probably not.
 
 **Does Kaiso let me add arbitrary routes?**<br>
 Not at this point, and possibly never. If that's a critical need for your project, our [starter-slimwp](https://github.com/TomodomoCo/starter-slimwp) approach might be a good option.
+
+**Can I use custom page templates with your implicit "routing" system?**<br>
+Yes, although it requires a hacky static method approach that we're generally uncomfortable with. So it goes.
+
+```php
+\Tomodomo\Kaiso::registerTemplates([
+    [
+        'name' => 'Wide Page',
+        'slug' => 'wide',
+        'postTypes' => [
+            'page',
+        ],
+    ],
+]);
+```
+
+The above code would register a custom page template, which would map to the controller `\Your\Controller\Path\WideTemplateController`.
+
+Some tips:
+
++ Avoid changing slugs; things will break.
++ Pop the registration method call in functions.php or another file that's loaded globally (a mu-plugin perhaps?) so templates are registered on the front and backend.
++ We will add `Template` to the controller name; don't do it yourself.
++ Avoid using any words that might conflict with the WordPress template hierarchy in your slugs (`page`, `post`, any `custom-post-type`, `archive`, etc.) or the load order might get confusing.
 
 ## Technical Overview
 

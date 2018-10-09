@@ -36,6 +36,13 @@ class Kaiso
         $this->container = new \Pimple\Container();
 
         /**
+         * Add settings to the container
+         *
+         * @psalm-suppress MissingClosureReturnType
+         */
+        $this->container['settings'] = $this->settings;
+
+        /**
          * Add wp_query to the container so it can be used later
          *
          * @psalm-suppress MissingClosureReturnType
@@ -70,10 +77,13 @@ class Kaiso
      */
     public function formatControllerName($name)
     {
-        return (string) \Stringy\Stringy::create($name)
-            ->removeRight('.php')
-            ->upperCamelize()
-            ->append('Controller');
+        $name = \Stringy\Stringy::create($name)->removeRight('.php');
+
+        if ($name->startsWith('404') || $name->startsWith('500')) {
+            $name = $name->ensureLeft('error-');
+        }
+
+        return (string) $name->upperCamelize()->append('Controller');
     }
 
     /**
@@ -165,5 +175,29 @@ class Kaiso
         }
 
         exit;
+    }
+
+    /**
+     * @return void
+     */
+    public static function registerTemplates(array $templates = [])
+    {
+        $customTemplates = [];
+
+        // Build the array
+        foreach ($templates as $template) {
+            foreach ($template['postTypes'] as $type) {
+                $customTemplates[$type]["{$template['slug']}-template.php"] = $template['name'];
+            }
+        }
+
+        foreach ($customTemplates as $postType => $postTypeTemplates) {
+            // Register in the appropriate hook
+            add_filter("theme_{$postType}_templates", function (array $templates) use ($postTypeTemplates) {
+                return $postTypeTemplates;
+            });
+        }
+
+        return;
     }
 }
