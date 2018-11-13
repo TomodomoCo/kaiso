@@ -134,7 +134,7 @@ class Kaiso
         // If we didn't get a controller, throw an exception
         if ($controller === null) {
             // @todo Use a specific Exception
-            throw new \Exception();
+            throw new \Exception("Could not find controller: {$controllerName}");
         }
 
         return $controller;
