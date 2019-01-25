@@ -4,6 +4,9 @@ namespace Tomodomo;
 
 use GuzzleHttp\Psr7;
 
+use Tomodomo\Kaiso\Exceptions\ControllerException;
+use Tomodomo\Kaiso\Exceptions\MethodException;
+
 class Kaiso
 {
     /**
@@ -111,6 +114,8 @@ class Kaiso
     /**
      * Find a working controller, or throw an exception
      *
+     * @throws ControllerException
+     *
      * @return object
      */
     public function getController()
@@ -133,8 +138,10 @@ class Kaiso
 
         // If we didn't get a controller, throw an exception
         if ($controller === null) {
-            // @todo Use a specific Exception
-            throw new \Exception("Could not find controller: {$controllerName}");
+            throw new ControllerException("Could not find controller: {$controllerName}", [
+                'controller' => $controllerName,
+                'method'     => null,
+            ]);
         }
 
         return $controller;
@@ -142,6 +149,8 @@ class Kaiso
 
     /**
      * The heart of the operation — run the app
+     *
+     * @throws MethodException
      *
      * @return void
      */
@@ -170,8 +179,10 @@ class Kaiso
         } elseif (method_exists($controller, $method)) {
             echo $controller->{$method}($request, $response, $args);
         } else {
-            // @todo Use a specific Exception
-            throw new \Exception();
+            throw new MethodException("Could not find method: {$method}", [
+                'controller' => get_class($controller),
+                'method'     => $method,
+            ]);
         }
 
         exit;
