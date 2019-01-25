@@ -2,7 +2,7 @@
 
 namespace Tomodomo\Kaiso\Exceptions;
 
-class BaseException extends Exception
+class BaseException extends \Exception
 {
     /**
      * An array of data about the Exception
