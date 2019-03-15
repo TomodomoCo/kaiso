@@ -179,8 +179,10 @@ class Kaiso
         } elseif (method_exists($controller, $method)) {
             echo $controller->{$method}($request, $response, $args);
         } else {
-            throw new MethodException("Could not find method: {$method}", [
-                'controller' => get_class($controller),
+            $controllerName = get_class($controller);
+
+            throw new MethodException("Could not find method `{$method}` for controller `{$controllerName}`", [
+                'controller' => get_class($controllerName),
                 'method'     => $method,
             ]);
         }
