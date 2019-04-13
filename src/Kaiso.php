@@ -2,10 +2,13 @@
 
 namespace Tomodomo;
 
-use GuzzleHttp\Psr7;
-
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Psr7\ServerRequest;
+use Pimple\Container;
 use Tomodomo\Kaiso\Exceptions\ControllerException;
 use Tomodomo\Kaiso\Exceptions\MethodException;
+use WP_Query;
+use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
 class Kaiso
 {
@@ -19,7 +22,7 @@ class Kaiso
     /**
      * Pimple container!
      *
-     * @var \Pimple\Container
+     * @var Container
      */
     public $container;
 
@@ -30,7 +33,7 @@ class Kaiso
      *
      * @return void
      */
-    public function __construct($settings = [])
+    public function __construct(array $settings = [])
     {
         // Merge defaults with custom settings
         $this->settings = array_merge($this->settings, $settings);
@@ -39,18 +42,14 @@ class Kaiso
         $this->container = new \Pimple\Container();
 
         /**
-         * Add settings to the container
-         *
-         * @psalm-suppress MissingClosureReturnType
+         * Add settings to the container.
          */
         $this->container['settings'] = $this->settings;
 
         /**
-         * Add wp_query to the container so it can be used later
-         *
-         * @psalm-suppress MissingClosureReturnType
+         * Add wp_query to the container so it can be used later.
          */
-        $this->container['wp_query'] = function () {
+        $this->container['wp_query'] = function () : WP_Query {
             global $wp_query;
 
             return $wp_query;
@@ -64,7 +63,7 @@ class Kaiso
      *
      * @return array
      */
-    public function getTemplateHierarchy()
+    public function getTemplateHierarchy() : array
     {
         $hierarchy = new \Brain\Hierarchy\Hierarchy();
 
@@ -78,7 +77,7 @@ class Kaiso
      *
      * @return string
      */
-    public function formatControllerName($name)
+    public function formatControllerName(string $name) : string
     {
         $name = \Stringy\Stringy::create($name)->removeRight('.php');
 
@@ -95,7 +94,7 @@ class Kaiso
      *
      * @return array
      */
-    public function getControllerHierarchy()
+    public function getControllerHierarchy() : array
     {
         $templates = $this->getTemplateHierarchy();
 
@@ -123,77 +122,58 @@ class Kaiso
         // Fetch our formatted list of controller names
         $controllers = $this->getControllerHierarchy();
 
-        // Empty controller to fill in later
-        $controller = null;
-
         // Loop through the possible controllers
         foreach ($controllers as $controllerName) {
-            // Check if it exists; instantiate if so
-            if (class_exists($controllerName)) {
-                $controller = new $controllerName($this->container);
-
-                break;
+            // Continue through the loop if we can't find the controller
+            if (!class_exists($controllerName)) {
+                continue;
             }
+
+            // Return the first matching controller we find
+            return new $controllerName($this->container);
         }
 
         // If we didn't get a controller, throw an exception
-        if ($controller === null) {
-            throw new ControllerException("Could not find controller: {$controllerName}", [
-                'controller' => $controllerName,
-                'method'     => null,
-            ]);
-        }
-
-        return $controller;
+        throw new ControllerException("Could not find controller: {$controllerName}", [
+            'controller' => $controllerName,
+            'method'     => null,
+        ]);
     }
 
     /**
      * The heart of the operation — run the app
      *
-     * @throws MethodException
-     *
      * @return void
      */
-    public function run()
+    public function run() : void
     {
         // @todo handle an exception here
         $controller = $this->getController();
 
-        // Grab the server request object
-        $request = Psr7\ServerRequest::fromGlobals();
-
-        // @todo Massage WordPress to use a PSR7-compatible response
-        $response = null;
+        // Grab the server request object and instantiate a response
+        $request  = ServerRequest::fromGlobals();
+        $response = new Response();
 
         // Pass along query args
         $args = $request->getQueryParams();
 
         // Get the request method
-        $method = strtolower($_SERVER['REQUEST_METHOD']);
+        $method = $this->getMethodForController($controller);
 
-        // If the method `any` exists on our found controller, load that.
-        // Otherwise, we load a method matching the request method (e.g.
-        // get(), post(), etc.
-        if (method_exists($controller, 'any')) {
-            echo $controller->any($request, $response, $args);
-        } elseif (method_exists($controller, $method)) {
-            echo $controller->{$method}($request, $response, $args);
-        } else {
-            $controllerName = get_class($controller);
+        $response = $controller->{$method}($request, $response, $args);
 
-            throw new MethodException("Could not find method `{$method}` for controller `{$controllerName}`", [
-                'controller' => get_class($controllerName),
-                'method'     => $method,
-            ]);
-        }
+        // Emit a response
+        (new SapiEmitter())->emit($response);
 
         exit;
     }
 
     /**
+     * Register custom template controllers so WordPress sees them.
+     *
      * @return void
      */
-    public static function registerTemplates(array $templates = [])
+    public static function registerTemplates(array $templates = []) : void
     {
         $customTemplates = [];
 
@@ -212,5 +192,37 @@ class Kaiso
         }
 
         return;
+    }
+
+    /**
+     * Get a handler method for the given controller class. If we
+     * can find a method specifically matching the HTTP verb (e.g.
+     * `get()`, `post()`, etc), use that. Otherwise, fall back to
+     * `any()`, and throw an exception if no handler is found.
+     *
+     * @param object $controller
+     *
+     * @throws MethodException
+     *
+     * @return string
+     */
+    public function getMethodForController($controller) : string
+    {
+        $method = strtolower($_SERVER['REQUEST_METHOD']);
+
+        if (method_exists($controller, $method)) {
+            return $method;
+        }
+
+        if (method_exists($controller, 'any')) {
+            return 'any';
+        }
+
+        $controllerName = get_class($controller);
+
+        throw new MethodException("Could not find method `{$method}()` for controller `{$controllerName}`", [
+            'controller' => $controllerName,
+            'method'     => $method,
+        ]);
     }
 }
