@@ -6,6 +6,7 @@ use GuzzleHttp\Psr7;
 
 use Tomodomo\Kaiso\Exceptions\ControllerException;
 use Tomodomo\Kaiso\Exceptions\MethodException;
+use function add_filter;
 
 class Kaiso
 {
